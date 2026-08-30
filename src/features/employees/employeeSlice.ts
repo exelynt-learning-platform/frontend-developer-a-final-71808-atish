@@ -17,6 +17,7 @@ employeeToEdit: Employee | null;
 editLoading: boolean;
 editError: string | null;
 deletingId: string | null;
+successMessage: string | null;
 }
 
 
@@ -33,6 +34,7 @@ employeeToEdit: null,
 editLoading: false,
 editError: null,
 deletingId: null,
+successMessage: null,
 
 };
 
@@ -88,6 +90,9 @@ clearEmployeeToEdit: (state) => {
   state.employeeToEdit = null;
   state.editError = null;
 },
+clearSuccessMessage: (state) => {
+  state.successMessage = null;
+},
 },
 
   extraReducers: (builder) => {
@@ -125,6 +130,7 @@ clearEmployeeToEdit: (state) => {
 .addCase(createEmployee.fulfilled, (state, action) => {
   state.saving = false;
   state.employees.push(action.payload);
+  state.successMessage = "Employee added successfully";
 })
 .addCase(createEmployee.rejected, (state, action) => {
   state.saving = false;
@@ -135,6 +141,7 @@ clearEmployeeToEdit: (state) => {
   state.editLoading = true;
   state.editError = null;
   state.employeeToEdit = null;
+  state.successMessage = null;
 })
 .addCase(fetchEmployeeForEdit.fulfilled, (state, action) => {
   state.editLoading = false;
@@ -148,9 +155,11 @@ clearEmployeeToEdit: (state) => {
 .addCase(updateEmployee.pending, (state) => {
   state.saving = true;
   state.mutationError = null;
+  state.successMessage = null;
 })
 .addCase(updateEmployee.fulfilled, (state, action) => {
   state.saving = false;
+  state.successMessage = "Employee updated successfully";
 
   const employeeIndex = state.employees.findIndex(
     (employee) => employee.id === action.payload.id,
@@ -170,9 +179,11 @@ clearEmployeeToEdit: (state) => {
 .addCase(deleteEmployee.pending, (state, action) => {
   state.deletingId = action.meta.arg;
   state.mutationError = null;
+  state.successMessage = null;
 })
 .addCase(deleteEmployee.fulfilled, (state, action) => {
   state.deletingId = null;
+  state.successMessage = "Employee deleted successfully";
 
   state.employees = state.employees.filter(
     (employee) => employee.id !== action.payload,
@@ -186,7 +197,8 @@ clearEmployeeToEdit: (state) => {
   state.deletingId = null;
   state.mutationError =
     action.payload ?? "Failed to delete employee";
-});
+})
+
 
       
   },
@@ -248,7 +260,8 @@ export const deleteEmployee = createAsyncThunk<
 export const {
   clearEmployeeSearch,
   clearMutationError,
-    clearEmployeeToEdit,
+  clearEmployeeToEdit,
+  clearSuccessMessage,
 } = employeeSlice.actions;
 
 export default employeeSlice.reducer;

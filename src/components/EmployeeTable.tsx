@@ -24,8 +24,16 @@ const EmployeeTable = ({
   onDelete,
 }: EmployeeTableProps) => {
   return (
-    <TableContainer component={Paper}>
-      <Table aria-label="employee table">
+    <TableContainer
+      component={Paper}
+      sx={{
+        display: { xs: "none", md: "block" },
+        border: "1px solid",
+        borderColor: "divider",
+        boxShadow: "none",
+      }}
+    >
+      <Table aria-label="Employee table">
         <TableHead>
           <TableRow>
             <TableCell>ID</TableCell>
@@ -50,7 +58,7 @@ const EmployeeTable = ({
                 <Stack
                   direction="row"
                   spacing={1}
-                  sx={{ justifyContent: 'center' }}
+                  sx={{justifyContent:"flex-end"}}
                 >
                   <Button
                     component={Link}

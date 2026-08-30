@@ -1,5 +1,13 @@
 import { useState, type FormEvent } from "react";
-import { Button, Stack, TextField } from "@mui/material";
+import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
+import RestartAltRoundedIcon from "@mui/icons-material/RestartAltRounded";
+import {
+  Button,
+  InputAdornment,
+  Paper,
+  Stack,
+  TextField,
+} from "@mui/material";
 
 interface EmployeeSearchProps {
   loading: boolean;
@@ -36,37 +44,77 @@ const EmployeeSearch = ({
   };
 
   return (
-    <Stack
+    <Paper
       component="form"
-      direction={{ xs: "column", sm: "row" }}
-      spacing={2}
       onSubmit={handleSubmit}
-      sx={{ mb: 3 }}
+      elevation={0}
+      sx={{
+        p: { xs: 2, sm: 2.5 },
+        mb: 3,
+        border: "1px solid",
+        borderColor: "divider",
+      }}
     >
-      <TextField
-  label="Search by employee ID"
-  value={employeeId}
-  onChange={(event) => setEmployeeId(event.target.value)}
-  error={Boolean(inputError)}
-  helperText={inputError}
-  size="small"
-  slotProps={{
-    htmlInput: {
-      inputMode: "numeric",
-    },
+      <Stack
+  direction={{ xs: "column", sm: "row" }}
+  spacing={1.5}
+  sx={{
+    alignItems: { xs: "stretch", sm: "flex-start" },
   }}
-/>
+>
+        <TextField
+          label="Employee ID"
+          placeholder="Enter an employee ID"
+          value={employeeId}
+          onChange={(event) => {
+            setEmployeeId(event.target.value);
 
-   
+            if (inputError) {
+              setInputError("");
+            }
+          }}
+          error={Boolean(inputError)}
+          helperText={inputError}
+          size="small"
+          fullWidth
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchRoundedIcon color="action" />
+                </InputAdornment>
+              ),
+            },
+            htmlInput: {
+              inputMode: "numeric",
+              "aria-label": "Employee ID",
+            },
+          }}
+          sx={{ maxWidth: { sm: 420 } }}
+        />
 
-      <Button type="submit" variant="contained" disabled={loading}>
-        {loading ? "Searching..." : "Search"}
-      </Button>
+        <Button
+          type="submit"
+          variant="contained"
+          startIcon={<SearchRoundedIcon />}
+          disabled={loading}
+          sx={{ minWidth: { sm: 120 } }}
+        >
+          {loading ? "Searching..." : "Search"}
+        </Button>
 
-      <Button type="button" variant="outlined" onClick={handleClear}>
-        Clear
-      </Button>
-    </Stack>
+        <Button
+          type="button"
+          variant="outlined"
+          startIcon={<RestartAltRoundedIcon />}
+          onClick={handleClear}
+          disabled={loading || !employeeId}
+          sx={{ minWidth: { sm: 110 } }}
+        >
+          Clear
+        </Button>
+      </Stack>
+    </Paper>
   );
 };
 
