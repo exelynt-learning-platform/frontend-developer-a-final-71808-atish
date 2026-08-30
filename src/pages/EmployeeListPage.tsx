@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import {
   Alert,
   Box,
+  Button,
   CircularProgress,
   Container,
   Typography,
@@ -9,23 +10,33 @@ import {
 import { useAppDispatch, useAppSelector } from "../app/hooks";
 import {
   clearEmployeeSearch,
+  deleteEmployee,
   fetchEmployees,
   searchEmployeeById,
 } from "../features/employees/employeeSlice";
 import EmployeeSearch from "../components/EmployeeSearch";
 import EmployeeTable from "../components/EmployeeTable";
+import { Link } from "react-router-dom";
+
+import {  useState } from "react";
+import type { Employee } from "../types/employee";
+import DeleteConfirmDialog from "../components/DeleteConfirmDialog";
 
 const EmployeeListPage = () => {
   const dispatch = useAppDispatch();
+  const [employeeToDelete, setEmployeeToDelete] =
+  useState<Employee | null>(null);
 
   const {
-    employees,
-    loading,
-    error,
-    searchedEmployee,
-    searchLoading,
-    searchError,
-  } = useAppSelector((state) => state.employees);
+  employees,
+  loading,
+  error,
+  searchedEmployee,
+  searchLoading,
+  searchError,
+  deletingId,
+  mutationError,
+} = useAppSelector((state) => state.employees);
 
   useEffect(() => {
     dispatch(fetchEmployees());
@@ -39,6 +50,18 @@ const EmployeeListPage = () => {
     dispatch(clearEmployeeSearch());
   };
 
+  const handleConfirmDelete = async () => {
+  if (!employeeToDelete) {
+    return;
+  }
+
+  try {
+    await dispatch(deleteEmployee(employeeToDelete.id)).unwrap();
+    setEmployeeToDelete(null);
+  } catch {
+    // Redux displays the error.
+  }
+};
   const displayedEmployees = searchedEmployee
     ? [searchedEmployee]
     : employees;
@@ -49,6 +72,14 @@ const EmployeeListPage = () => {
         <Typography variant="h4" component="h1" sx={{ mb: 3 }}>
           Employee Management
         </Typography>
+        <Button
+  component={Link}
+  to="/employees/add"
+  variant="contained"
+  sx={{ mb: 3 }}
+>
+  Add Employee
+</Button>
 
         <EmployeeSearch
           loading={searchLoading}
@@ -73,10 +104,27 @@ const EmployeeListPage = () => {
         {!loading && !error && displayedEmployees.length === 0 && (
           <Alert severity="info">No employees found.</Alert>
         )}
+        {mutationError && (
+  <Alert severity="error" sx={{ mb: 3 }}>
+    {mutationError}
+  </Alert>
+)}
 
         {!loading && !error && displayedEmployees.length > 0 && (
-          <EmployeeTable employees={displayedEmployees} />
+          <EmployeeTable
+  employees={displayedEmployees}
+  deletingId={deletingId}
+  onDelete={setEmployeeToDelete}
+/>
+
+
         )}
+        <DeleteConfirmDialog
+  employee={employeeToDelete}
+  loading={Boolean(deletingId)}
+  onClose={() => setEmployeeToDelete(null)}
+  onConfirm={handleConfirmDelete}
+/>
       </Box>
     </Container>
   );

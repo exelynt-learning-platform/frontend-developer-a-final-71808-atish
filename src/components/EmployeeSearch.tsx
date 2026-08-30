@@ -44,14 +44,20 @@ const EmployeeSearch = ({
       sx={{ mb: 3 }}
     >
       <TextField
-        label="Search by employee ID"
-        value={employeeId}
-        onChange={(event) => setEmployeeId(event.target.value)}
-        error={Boolean(inputError)}
-        helperText={inputError}
-        size="small"
-        inputProps={{ inputMode: "numeric" }}
-      />
+  label="Search by employee ID"
+  value={employeeId}
+  onChange={(event) => setEmployeeId(event.target.value)}
+  error={Boolean(inputError)}
+  helperText={inputError}
+  size="small"
+  slotProps={{
+    htmlInput: {
+      inputMode: "numeric",
+    },
+  }}
+/>
+
+   
 
       <Button type="submit" variant="contained" disabled={loading}>
         {loading ? "Searching..." : "Search"}

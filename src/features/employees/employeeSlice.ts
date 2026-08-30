@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import type { Employee } from "../../types/employee";
 import { employeeService } from "../../services/employeeService";
 import axios from "axios";
+import type { EmployeeFormValues } from "./employeeValidation";
 
 interface EmployeeState {
   employees: Employee[];
@@ -10,6 +11,12 @@ interface EmployeeState {
   searchedEmployee: Employee | null;
 searchLoading: boolean;
 searchError: string | null;
+saving: boolean;
+mutationError: string | null;
+employeeToEdit: Employee | null;
+editLoading: boolean;
+editError: string | null;
+deletingId: string | null;
 }
 
 
@@ -20,8 +27,20 @@ const initialState: EmployeeState = {
   searchedEmployee: null,
   searchLoading: false,
   searchError: null,
+  saving: false,
+mutationError: null,
+employeeToEdit: null,
+editLoading: false,
+editError: null,
+deletingId: null,
+
 };
 
+
+interface UpdateEmployeePayload {
+  id: string;
+  values: EmployeeFormValues;
+}
 export const fetchEmployees = createAsyncThunk<
   Employee[],
   void,
@@ -62,6 +81,13 @@ const employeeSlice = createSlice({
     state.searchedEmployee = null;
     state.searchError = null;
   },
+  clearMutationError: (state) => {
+  state.mutationError = null;
+},
+clearEmployeeToEdit: (state) => {
+  state.employeeToEdit = null;
+  state.editError = null;
+},
 },
 
   extraReducers: (builder) => {
@@ -91,11 +117,138 @@ const employeeSlice = createSlice({
   state.searchLoading = false;
   state.searchError =
     action.payload ?? "Unable to search for the employee";
+})
+.addCase(createEmployee.pending, (state) => {
+  state.saving = true;
+  state.mutationError = null;
+})
+.addCase(createEmployee.fulfilled, (state, action) => {
+  state.saving = false;
+  state.employees.push(action.payload);
+})
+.addCase(createEmployee.rejected, (state, action) => {
+  state.saving = false;
+  state.mutationError =
+    action.payload ?? "Failed to create employee";
+})
+.addCase(fetchEmployeeForEdit.pending, (state) => {
+  state.editLoading = true;
+  state.editError = null;
+  state.employeeToEdit = null;
+})
+.addCase(fetchEmployeeForEdit.fulfilled, (state, action) => {
+  state.editLoading = false;
+  state.employeeToEdit = action.payload;
+})
+.addCase(fetchEmployeeForEdit.rejected, (state, action) => {
+  state.editLoading = false;
+  state.editError =
+    action.payload ?? "Unable to load employee";
+})
+.addCase(updateEmployee.pending, (state) => {
+  state.saving = true;
+  state.mutationError = null;
+})
+.addCase(updateEmployee.fulfilled, (state, action) => {
+  state.saving = false;
+
+  const employeeIndex = state.employees.findIndex(
+    (employee) => employee.id === action.payload.id,
+  );
+
+  if (employeeIndex !== -1) {
+    state.employees[employeeIndex] = action.payload;
+  }
+
+  state.employeeToEdit = action.payload;
+})
+.addCase(updateEmployee.rejected, (state, action) => {
+  state.saving = false;
+  state.mutationError =
+    action.payload ?? "Failed to update employee";
+})
+.addCase(deleteEmployee.pending, (state, action) => {
+  state.deletingId = action.meta.arg;
+  state.mutationError = null;
+})
+.addCase(deleteEmployee.fulfilled, (state, action) => {
+  state.deletingId = null;
+
+  state.employees = state.employees.filter(
+    (employee) => employee.id !== action.payload,
+  );
+
+  if (state.searchedEmployee?.id === action.payload) {
+    state.searchedEmployee = null;
+  }
+})
+.addCase(deleteEmployee.rejected, (state, action) => {
+  state.deletingId = null;
+  state.mutationError =
+    action.payload ?? "Failed to delete employee";
 });
 
       
   },
 });
-export const { clearEmployeeSearch } = employeeSlice.actions;
+
+
+export const createEmployee = createAsyncThunk<
+  Employee,
+  EmployeeFormValues,
+  { rejectValue: string }
+>("employees/create", async (employee, thunkAPI) => {
+  try {
+    return await employeeService.create(employee);
+  } catch {
+    return thunkAPI.rejectWithValue("Failed to create employee");
+  }
+});
+
+export const fetchEmployeeForEdit = createAsyncThunk<
+  Employee,
+  string,
+  { rejectValue: string }
+>("employees/fetchForEdit", async (id, thunkAPI) => {
+  try {
+    return await employeeService.getById(id);
+  } catch {
+    return thunkAPI.rejectWithValue(
+      `Unable to load employee with ID ${id}`,
+    );
+  }
+});
+
+export const updateEmployee = createAsyncThunk<
+  Employee,
+  UpdateEmployeePayload,
+  { rejectValue: string }
+>("employees/update", async ({ id, values }, thunkAPI) => {
+  try {
+    return await employeeService.update(id, values);
+  } catch {
+    return thunkAPI.rejectWithValue("Failed to update employee");
+  }
+});
+
+export const deleteEmployee = createAsyncThunk<
+  string,
+  string,
+  { rejectValue: string }
+>("employees/delete", async (id, thunkAPI) => {
+  try {
+    await employeeService.remove(id);
+    return id;
+  } catch {
+    return thunkAPI.rejectWithValue("Failed to delete employee");
+  }
+});
+
+
+export const {
+  clearEmployeeSearch,
+  clearMutationError,
+    clearEmployeeToEdit,
+} = employeeSlice.actions;
 
 export default employeeSlice.reducer;
