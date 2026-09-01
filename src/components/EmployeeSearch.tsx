@@ -1,4 +1,8 @@
-import { useState, type FormEvent } from "react";
+import {
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+} from "react";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import RestartAltRoundedIcon from "@mui/icons-material/RestartAltRounded";
 import {
@@ -33,8 +37,34 @@ const EmployeeSearch = ({
       return;
     }
 
+    if (!/^\d+$/.test(trimmedId)) {
+      setInputError("Employee ID must contain only digits");
+      return;
+    }
+
     setInputError("");
     onSearch(trimmedId);
+  };
+
+  const handleInputChange = (
+    event: ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement
+    >,
+  ) => {
+    const value = event.target.value;
+
+    if (!/^\d*$/.test(value)) {
+      setInputError("Employee ID must contain only digits");
+      return;
+    }
+
+    setEmployeeId(value);
+    setInputError("");
+
+    // Restore the complete list if the input is manually emptied.
+    if (!value) {
+      onClear();
+    }
   };
 
   const handleClear = () => {
@@ -46,6 +76,7 @@ const EmployeeSearch = ({
   return (
     <Paper
       component="form"
+      aria-label="Search employees by ID"
       onSubmit={handleSubmit}
       elevation={0}
       sx={{
@@ -56,23 +87,20 @@ const EmployeeSearch = ({
       }}
     >
       <Stack
-  direction={{ xs: "column", sm: "row" }}
-  spacing={1.5}
-  sx={{
-    alignItems: { xs: "stretch", sm: "flex-start" },
-  }}
->
+        direction={{ xs: "column", sm: "row" }}
+        spacing={1.5}
+        sx={{
+          alignItems: {
+            xs: "stretch",
+            sm: "flex-start",
+          },
+        }}
+      >
         <TextField
           label="Employee ID"
           placeholder="Enter an employee ID"
           value={employeeId}
-          onChange={(event) => {
-            setEmployeeId(event.target.value);
-
-            if (inputError) {
-              setInputError("");
-            }
-          }}
+          onChange={handleInputChange}
           error={Boolean(inputError)}
           helperText={inputError}
           size="small"
@@ -87,6 +115,7 @@ const EmployeeSearch = ({
             },
             htmlInput: {
               inputMode: "numeric",
+              pattern: "[0-9]*",
               "aria-label": "Employee ID",
             },
           }}
