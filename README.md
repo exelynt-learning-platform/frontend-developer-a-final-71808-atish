@@ -1,75 +1,256 @@
-# React + TypeScript + Vite
+# PeopleHub Employee Management
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A responsive employee management application built with React and TypeScript. It demonstrates API integration, centralized state management, reusable component architecture, form validation, error handling, responsive design, and unit testing.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- View employees in a responsive table
+- Mobile and tablet employee-card layout
+- Search for an employee by ID
+- Add new employees
+- Edit employees with pre-populated form values
+- Delete employees after confirmation
+- Country selection using the provided country API
+- Required-field, email, mobile, and length validation
+- Loading, error, empty, and success states
+- Responsive Material UI interface
+- Route-level lazy loading
+- Unit tests with mocked API calls
 
-## React Compiler
+## Technology Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React
+- TypeScript
+- Vite
+- Redux Toolkit
+- React Redux
+- React Router
+- Axios
+- Material UI
+- React Hook Form
+- Zod
+- Vitest
+- React Testing Library
 
-## Expanding the ESLint configuration
+## API Endpoints
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Base URL:
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```text
+https://669b3f09276e45187d34eb4e.mockapi.io/api/v1
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+### Employees
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+| Method | Endpoint | Purpose |
+|---|---|---|
+| GET | `/employee` | Get all employees |
+| GET | `/employee/:id` | Get employee by ID |
+| POST | `/employee` | Create employee |
+| PUT | `/employee/:id` | Update employee |
+| DELETE | `/employee/:id` | Delete employee |
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Countries
 
+| Method | Endpoint | Purpose |
+|---|---|---|
+| GET | `/country` | Get all countries |
+
+## Project Structure
+
+```text
+src/
+├── app/
+│   ├── hooks.ts
+│   ├── store.ts
+│   └── theme.ts
+├── components/
+│   ├── AppHeader.tsx
+│   ├── DeleteConfirmDialog.tsx
+│   ├── EmployeeCardList.tsx
+│   ├── EmployeeForm.tsx
+│   ├── EmployeeSearch.tsx
+│   └── EmployeeTable.tsx
+├── features/
+│   ├── countries/
+│   │   └── countrySlice.ts
+│   └── employees/
+│       ├── employeeSlice.ts
+│       └── employeeValidation.ts
+├── pages/
+│   ├── EmployeeFormPage.tsx
+│   └── EmployeeListPage.tsx
+├── services/
+│   ├── api.ts
+│   ├── countryService.ts
+│   └── employeeService.ts
+├── test/
+│   └── setup.ts
+└── types/
+    ├── country.ts
+    └── employee.ts
 ```
+
+## Component Architecture
+
+The application follows smart and dumb component separation.
+
+### Smart Components
+
+Page components connect to Redux and manage business logic:
+
+- `EmployeeListPage`
+- `EmployeeFormPage`
+
+### Dumb Components
+
+Presentation components receive data and callbacks through props:
+
+- `EmployeeTable`
+- `EmployeeCardList`
+- `EmployeeSearch`
+- `EmployeeForm`
+- `DeleteConfirmDialog`
+
+## State Management
+
+Redux Toolkit maintains:
+
+- Employee collection
+- Country collection
+- Search result
+- Employee selected for editing
+- Loading states
+- API error states
+- Mutation states
+- Success messages
+
+Asynchronous thunks communicate with the API through dedicated service files.
+
+```text
+Component
+   ↓ dispatch
+Redux async thunk
+   ↓
+API service
+   ↓
+Mock API
+   ↓
+Redux state update
+   ↓
+Responsive UI
+```
+
+## Form Validation
+
+The employee form validates:
+
+| Field | Rules |
+|---|---|
+| Name | Required, 2–50 characters |
+| Email | Required, valid email, maximum 100 characters |
+| Mobile | Required, 10–15 digits |
+| Country | Required |
+| State | Required, 2–50 characters |
+| District | Required, 2–50 characters |
+
+Validation is implemented with React Hook Form and Zod.
+
+## Responsive Design
+
+- Desktop: employee table
+- Mobile and tablet: employee cards
+- Responsive search toolbar
+- Responsive add/edit form
+- Full-width mobile actions
+- Long email addresses wrap safely
+
+## Installation
+
+Requirements:
+
+- Node.js 20 or newer
+- npm
+
+Clone the repository and switch to the assignment branch:
+
+```bash
+git clone https://github.com/exelynt-learning-platform/frontend-developer-a-final-71808-atish.git
+cd frontend-developer-a-final-71808-atish
+git switch frontend-developer-assignment-deadline-30th-sep-2026-64052-2703
+```
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Start the development server:
+
+```bash
+npm run dev
+```
+
+Create a production build:
+
+```bash
+npm run build
+```
+
+## Testing
+
+Run all tests once:
+
+```bash
+npm run test:run
+```
+
+Run tests in watch mode:
+
+```bash
+npm test
+```
+
+Test coverage includes:
+
+- Zod validation rules
+- Employee API service methods
+- Redux state transitions
+- Add and edit form behavior
+- Edit-form pre-population
+- Delete confirmation interaction
+- Loading and disabled states
+
+All API calls are mocked during testing. Tests do not create, update, or delete real API records.
+
+## Available Scripts
+
+| Command | Purpose |
+|---|---|
+| `npm run dev` | Start development server |
+| `npm run build` | Create production build |
+| `npm run lint` | Run ESLint |
+| `npm test` | Run tests in watch mode |
+| `npm run test:run` | Run all tests once |
+| `npm run preview` | Preview production build |
+
+## Error Handling
+
+The application handles:
+
+- Employee-list API failures
+- Country API failures
+- Employee-not-found responses
+- Create, update, and delete failures
+- Invalid form submissions
+- Empty employee results
+- Loading and mutation states
+
+## Performance
+
+- Route-level lazy loading
+- Separate list and form bundles
+- Centralized API calls
+- Efficient Redux state updates
+- Responsive desktop and mobile rendering
